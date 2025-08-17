@@ -1,6 +1,7 @@
 .hero-section {
-  height: 300px;
- background: url('../assets/hero.jpg')
+  height: 200px;
+ background: url('../assets/hero.jpg');
+ transition:all 0.3 ease;
 }
 
 .product-card {
@@ -39,3 +40,6 @@
   background: rgba(0,0,0,0.4); /* dark overlay for text visibility */
 }
 
+.hero-shrink {
+  height: 150px; /* shrunk hero when typing */
+}

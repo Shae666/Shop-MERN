@@ -10,12 +10,18 @@ export default function Cart({ updateCartCount }) {
   const user = auth?.user;
   const userEmail = user?.email;
 
-  // Load cart from localStorage
+  // Load cart from localStorage and ensure qty is at least 1
   useEffect(() => {
     if (!userEmail) return;
     const storedCart =
       JSON.parse(localStorage.getItem(`cart_${userEmail}`)) || [];
-    setCart(storedCart);
+
+    const initializedCart = storedCart.map((item) => ({
+      ...item,
+      qty: item.qty || 1
+    }));
+
+    setCart(initializedCart);
   }, [userEmail]);
 
   const updateCartStorage = (newCart) => {
@@ -30,7 +36,8 @@ export default function Cart({ updateCartCount }) {
   };
 
   const handleQuantityChange = (productId, qty) => {
-    if (qty < 1) return;
+    qty = parseInt(qty) || 1; // fallback to 1 if NaN
+    if (qty < 1) qty = 1; // prevent going below 1
     const newCart = cart.map((item) =>
       item.productId === productId ? { ...item, qty } : item
     );
@@ -83,13 +90,9 @@ export default function Cart({ updateCartCount }) {
                 <input
                   type="number"
                   min="1"
-                  placeholder="Enter quantity"
                   value={item.qty}
                   onChange={(e) =>
-                    handleQuantityChange(
-                      item.productId,
-                      parseInt(e.target.value)
-                    )
+                    handleQuantityChange(item.productId, e.target.value)
                   }
                   className="form-control w-50"
                 />

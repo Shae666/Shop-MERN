@@ -7,9 +7,8 @@ import headphoneimg from "../assets/headphones.jpg";
 import Boots from "../assets/Nike.png";
 import hoodie from "../assets/hoodie.jpg";
 import Navbar from "../components/Navbar";
-import speaker from "../assets/speaker.png";
+import backpack from "../assets/backpack.jpg";
 import cap from "../assets/cap.jpg";
-
 
 function Home() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,6 +18,7 @@ function Home() {
   const [discounts, setDiscounts] = useState({});
   const [discountInputs, setDiscountInputs] = useState({});
   const [ratings, setRatings] = useState({});
+  const [userRatings, setUserRatings] = useState({}); // store which products the current user rated
 
   const auth = JSON.parse(localStorage.getItem("auth_v1"));
   const user = auth?.user;
@@ -33,10 +33,10 @@ function Home() {
     { id: 4, name: "Nike Mercurial Superfly", price: 79.99, image: Boots },
     { id: 6, name: "Porshe Formula Team Cap", price: 99.99, image: cap },
     { id: 7, name: "Levi's Hoodie", price: 109.99, image: hoodie },
-    { id: 8, name: "Marshall Speaker", price: 119.99, image: speaker },
+    { id: 8, name: "Shae's Backpack", price: 119.99, image: backpack },
   ];
 
-  // Load from localStorage
+  // Load data from localStorage
   useEffect(() => {
     if (!userEmail) return;
 
@@ -44,11 +44,13 @@ function Home() {
     const storedCart = JSON.parse(localStorage.getItem(`cart_${userEmail}`)) || [];
     const storedDiscounts = JSON.parse(localStorage.getItem("discounts")) || {};
     const storedRatings = JSON.parse(localStorage.getItem("ratings")) || {};
+    const storedUserRatings = JSON.parse(localStorage.getItem(`userRatings_${userEmail}`)) || {};
 
     setWishlist(storedWishlist);
     setCart(storedCart);
     setDiscounts(storedDiscounts);
     setRatings(storedRatings);
+    setUserRatings(storedUserRatings);
   }, [userEmail]);
 
   const updateWishlist = (newWishlist) => {
@@ -113,18 +115,30 @@ function Home() {
     alert(`Discount ${value}% applied to product ID ${productId}`);
   };
 
+  // Handle single rating per user
   const handleRating = (productId, value) => {
+    if (userRatings[productId]) {
+      alert("You have already rated this product!");
+      return;
+    }
+
     const current = ratings[productId] || { total: 0, count: 0 };
-    const updated = {
+    const updatedRatings = {
       ...ratings,
       [productId]: { total: current.total + value, count: current.count + 1 }
     };
-    updateRatings(updated);
+    updateRatings(updatedRatings);
+
+    const updatedUserRatings = { ...userRatings, [productId]: true };
+    setUserRatings(updatedUserRatings);
+    localStorage.setItem(`userRatings_${userEmail}`, JSON.stringify(updatedUserRatings));
   };
 
   const resetRatings = () => {
     localStorage.removeItem("ratings");
+    localStorage.removeItem(`userRatings_${userEmail}`);
     setRatings({});
+    setUserRatings({});
     alert("All ratings have been reset!");
   };
 
@@ -145,7 +159,7 @@ function Home() {
         setSortOption={setSortOption}
       />
 
-      <div className="hero-section text-center text-white d-flex flex-column justify-content-center align-items-center">
+      <div className={`hero-section text-center text-white d-flex flex-column justify-content-center align-items-center ${searchTerm ? "hero-shrink" : ""}`}>
         <h1>Welcome to ShopEasy</h1>
         <p>Find the best deals on your favorite items</p>
       </div>
@@ -170,6 +184,7 @@ function Home() {
 
               const ratingData = ratings[product.id];
               const avgRating = ratingData ? (ratingData.total / ratingData.count).toFixed(1) : "0";
+              const alreadyRated = userRatings[product.id];
 
               return (
                 <div key={product.id} className="col-md-3 mb-4">
@@ -178,7 +193,6 @@ function Home() {
                     <div className="card-body text-center">
                       <h5 className="card-title">{product.name}</h5>
 
-                      {/* 💲 Price with discount display */}
                       <p className="card-text">
                         {discounts[product.id] ? (
                           <>
@@ -193,13 +207,13 @@ function Home() {
                         )}
                       </p>
 
-                      {/* ⭐ Rating */}
+                      {/* Rating */}
                       <div className="rating mb-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                        {[1,2,3,4,5].map((star) => (
                           <span
                             key={star}
-                            style={{ cursor: "pointer", fontSize: "1.2rem" }}
-                            onClick={() => handleRating(product.id, star)}
+                            style={{ cursor: alreadyRated ? "not-allowed" : "pointer", fontSize: "1.2rem", color: avgRating >= star ? "#FFD700" : "#ccc" }}
+                            onClick={() => !alreadyRated && handleRating(product.id, star)}
                           >
                             {avgRating >= star ? "⭐" : "☆"}
                           </span>
