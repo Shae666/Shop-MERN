@@ -1,0 +1,21 @@
+.signup-container {
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+}
+
+.signup-card {
+  width: 350px;
+  border-radius: 10px;
+}
+
+.form-control {
+  border-radius: 8px;
+}
+
+.btn-success {
+  background-color: #f7971e;
+  border: none;
+}
+
+.btn-success:hover {
+  background-color: #e6891b;
+}

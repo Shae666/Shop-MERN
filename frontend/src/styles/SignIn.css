@@ -1,0 +1,21 @@
+.signin-container {
+  background: linear-gradient(135deg, #6e8efb, #a777e3);
+}
+
+.signin-card {
+  width: 350px;
+  border-radius: 10px;
+}
+
+.form-control {
+  border-radius: 8px;
+}
+
+.btn-primary {
+  background-color: #6e8efb;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #5a75d1;
+}

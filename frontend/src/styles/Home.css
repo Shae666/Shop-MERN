@@ -1,0 +1,41 @@
+.hero-section {
+  height: 300px;
+ background: url('../assets/hero.jpg')
+}
+
+.product-card {
+  border-radius: 10px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.product-card:hover {
+  transform: scale(1.05);
+}
+
+.btn-primary {
+  background-color: #6e8efb;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #5a75d1;
+}
+
+.hero-section {
+  background: url('../assets/hero.jpg') no-repeat center center;
+  background-size: cover;
+  height: 70vh; /* adjust as needed */
+  position: relative;
+}
+.hero-section h1,
+.hero-section p {
+  z-index: 2;
+  position: relative;
+}
+.hero-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4); /* dark overlay for text visibility */
+}
+
