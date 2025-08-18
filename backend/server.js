@@ -4,7 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
-const wishlistRoutes = require('./routes/wishlistRoutes'); // ✅ CommonJS style
+
 
 const app = express();
 
