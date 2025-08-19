@@ -13,8 +13,10 @@ export default function Checkout() {
     email: "",
     address: "",
     city: "",
+    state: "",
     postalCode: "",
     cardNumber: "",
+    paymentMethod: "card", // default = card
   });
 
   const [errors, setErrors] = useState({});
@@ -25,9 +27,9 @@ export default function Checkout() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // ✅ Fetch City from Indian PIN
+  // ✅ Fetch City + State from Indian PIN
   const fetchCityFromPin = async (pin) => {
-    if (pin.length !== 6) return; // check only when 6 digits
+    if (pin.length !== 6) return;
     setLoadingCity(true);
     try {
       const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
@@ -35,19 +37,20 @@ export default function Checkout() {
 
       if (data[0].Status === "Success" && data[0].PostOffice?.length > 0) {
         const cityName = data[0].PostOffice[0].District;
-        setForm((prev) => ({ ...prev, city: cityName }));
+        const stateName = data[0].PostOffice[0].State;
+        setForm((prev) => ({ ...prev, city: cityName, state: stateName }));
         setErrors((prev) => ({ ...prev, postalCode: "" }));
       } else {
         setErrors((prev) => ({
           ...prev,
           postalCode: "❌ Invalid PIN code",
         }));
-        setForm((prev) => ({ ...prev, city: "" }));
+        setForm((prev) => ({ ...prev, city: "", state: "" }));
       }
     } catch (err) {
       setErrors((prev) => ({
         ...prev,
-        postalCode: "⚠️ Failed to fetch city",
+        postalCode: "⚠️ Failed to fetch city/state",
       }));
     }
     setLoadingCity(false);
@@ -63,8 +66,13 @@ export default function Checkout() {
     if (!form.postalCode || form.postalCode.length !== 6)
       newErrors.postalCode = "Valid 6-digit PIN required";
     if (!form.city) newErrors.city = "City is required (check PIN)";
-    if (!form.cardNumber || form.cardNumber.length < 12)
-      newErrors.cardNumber = "Valid card number required";
+    if (!form.state) newErrors.state = "State is required (check PIN)";
+
+    // Card validation only if card selected
+    if (form.paymentMethod === "card") {
+      if (!form.cardNumber || form.cardNumber.length < 12)
+        newErrors.cardNumber = "Valid card number required";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -73,7 +81,12 @@ export default function Checkout() {
   // ✅ Place Order
   const handlePlaceOrder = () => {
     if (!validate()) return;
-    alert("✅ Order placed successfully!");
+
+    alert(
+      `✅ Order placed successfully!\nPayment: ${
+        form.paymentMethod === "cod" ? "Cash on Delivery" : "Card Payment"
+      }\nShipping to: ${form.city}, ${form.state}`
+    );
     navigate("/");
   };
 
@@ -84,6 +97,7 @@ export default function Checkout() {
         <p>No items found for checkout.</p>
       ) : (
         <>
+          {/* Cart Items */}
           <div className="checkout-items mb-4">
             {cart.map((item) => (
               <div
@@ -158,7 +172,7 @@ export default function Checkout() {
                 }
               }}
             />
-            {loadingCity && <p>Fetching city...</p>}
+            {loadingCity && <p>Fetching city & state...</p>}
             {errors.postalCode && <p className="text-danger">{errors.postalCode}</p>}
 
             <input
@@ -167,24 +181,68 @@ export default function Checkout() {
               placeholder="City"
               className="form-control mb-2"
               value={form.city}
-              onChange={handleChange}
               readOnly
             />
             {errors.city && <p className="text-danger">{errors.city}</p>}
 
             <input
               type="text"
-              name="cardNumber"
-              placeholder="Card Number"
-              className="form-control mb-3"
-              value={form.cardNumber}
-              onChange={handleChange}
+              name="state"
+              placeholder="State"
+              className="form-control mb-2"
+              value={form.state}
+              readOnly
             />
-            {errors.cardNumber && <p className="text-danger">{errors.cardNumber}</p>}
+            {errors.state && <p className="text-danger">{errors.state}</p>}
 
-            <button className="btn btn-primary w-100" onClick={handlePlaceOrder}>
-              Place Order
-            </button>
+            {/* ✅ Payment Method */}
+            <div className="mb-3">
+              <label className="form-label">Payment Method</label>
+              <select
+                name="paymentMethod"
+                className="form-control"
+                value={form.paymentMethod}
+                onChange={handleChange}
+              >
+                <option value="card">Credit/Debit Card</option>
+                <option value="cod">Cash on Delivery</option>
+              </select>
+            </div>
+
+            {/* Show card field only if card is selected */}
+            {form.paymentMethod === "card" && (
+              <>
+                <input
+                  type="text"
+                  name="cardNumber"
+                  placeholder="Card Number"
+                  className="form-control mb-3"
+                  value={form.cardNumber}
+                  onChange={handleChange}
+                />
+                {errors.cardNumber && (
+                  <p className="text-danger">{errors.cardNumber}</p>
+                )}
+              </>
+            )}
+
+            <div className="d-flex gap-2">
+              {/* Back to Home */}
+              <button
+                className="btn btn-secondary w-50"
+                onClick={() => navigate("/")}
+              >
+                ⬅ Back to Home
+              </button>
+
+              {/* Place Order */}
+              <button
+                className="btn btn-primary w-50"
+                onClick={handlePlaceOrder}
+              >
+                Place Order
+              </button>
+            </div>
           </div>
         </>
       )}
