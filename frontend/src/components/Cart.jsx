@@ -18,7 +18,7 @@ export default function Cart({ updateCartCount }) {
 
     const initializedCart = storedCart.map((item) => ({
       ...item,
-      qty: item.qty || 1
+      qty: item.qty || 1,
     }));
 
     setCart(initializedCart);
@@ -47,8 +47,7 @@ export default function Cart({ updateCartCount }) {
   // Calculate total price using discountedPrice if available
   const totalPrice = cart
     .reduce(
-      (sum, item) =>
-        sum + (item.discountedPrice ?? item.price) * item.qty,
+      (sum, item) => sum + (item.discountedPrice ?? item.price) * item.qty,
       0
     )
     .toFixed(2);
@@ -62,60 +61,121 @@ export default function Cart({ updateCartCount }) {
     <div className="container my-5">
       {/* Back to Home button */}
       <button
-        className="btn btn-secondary mb-3"
+        className="btn btn-outline-dark mb-4"
         onClick={() => navigate("/Home")}
       >
-        ← Back to Home
+        ← Continue Shopping
       </button>
 
-      <h1 className="mb-4">Your Cart 🛒</h1>
-      {cart.length === 0 ? (
-        <p>Your cart is empty.</p>
-      ) : (
-        <div className="cart-items">
-          {cart.map((item) => (
-            <div
-              key={item.productId}
-              className="cart-item d-flex align-items-center mb-3 p-3 shadow-sm rounded"
-            >
+      <div className="row">
+        {/* Cart Items Section */}
+        <div className="col-lg-8">
+          <h2 className="fw-bold mb-4">Your Shopping Cart 🛒</h2>
+          {cart.length === 0 ? (
+            <div className="text-center my-5">
               <img
-                src={item.img}
-                alt={item.title}
-                width="100"
-                className="me-3 rounded"
+                src="https://cdn-icons-png.flaticon.com/512/11329/11329060.png"
+                alt="Empty Cart"
+                style={{ width: "140px", opacity: 0.7 }}
               />
-              <div className="flex-grow-1">
-                <h5>{item.title}</h5>
-                <p>${(item.discountedPrice ?? item.price).toFixed(2)}</p>
-                <input
-                  type="number"
-                  min="1"
-                  value={item.qty}
-                  onChange={(e) =>
-                    handleQuantityChange(item.productId, e.target.value)
-                  }
-                  className="form-control w-50"
-                />
-              </div>
+              <h3 className="mt-3">Your cart is empty 🛍️</h3>
+              <p className="text-muted">
+                Looks like you haven’t added anything yet.
+              </p>
               <button
-                className="btn btn-danger ms-3"
-                onClick={() => handleRemove(item.productId)}
+                className="btn btn-primary mt-3"
+                onClick={() => navigate("/Home")}
               >
-                Remove
+                Start Shopping →
               </button>
             </div>
-          ))}
-          <div className="text-end mt-4">
-            <h4>Total: ${totalPrice}</h4>
-            <button
-              className="btn btn-success mt-2"
-              onClick={handleCheckout}
-            >
-              Proceed to Checkout
-            </button>
-          </div>
+          ) : (
+            cart.map((item) => (
+              <div
+                key={item.productId}
+                className="cart-item card mb-3 shadow-sm border-0"
+              >
+                <div className="row g-0 align-items-center p-3">
+                  <div className="col-md-3 text-center">
+                    <img
+                      src={item.img}
+                      alt={item.title}
+                      className="img-fluid rounded"
+                      style={{ maxHeight: "120px" }}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <h5 className="fw-semibold">{item.title}</h5>
+                    <p className="text-muted small mb-1">
+                      Price: $
+                      {(item.discountedPrice ?? item.price).toFixed(2)}
+                    </p>
+                    <p className="fw-semibold">
+                      Subtotal: $
+                      {(
+                        (item.discountedPrice ?? item.price) * item.qty
+                      ).toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="col-md-3 d-flex flex-column align-items-end">
+                    <input
+                      type="number"
+                      min="1"
+                      value={item.qty}
+                      onChange={(e) =>
+                        handleQuantityChange(item.productId, e.target.value)
+                      }
+                      className="form-control w-75 mb-2"
+                    />
+                    <button
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => handleRemove(item.productId)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
-      )}
+
+        {/* Order Summary Section */}
+        {cart.length > 0 && (
+          <div className="col-lg-4">
+            <div
+              className="card shadow-sm border-0 p-4 sticky-top"
+              style={{ top: "100px" }}
+            >
+              <h4 className="fw-bold mb-3">Order Summary</h4>
+              <div className="d-flex justify-content-between mb-2">
+                <span>Items ({cart.length})</span>
+                <span>
+                  $
+                  {cart
+                    .reduce(
+                      (sum, item) =>
+                        sum + (item.discountedPrice ?? item.price) * item.qty,
+                      0
+                    )
+                    .toFixed(2)}
+                </span>
+              </div>
+              <hr />
+              <div className="d-flex justify-content-between fw-bold mb-3">
+                <span>Total</span>
+                <span>${totalPrice}</span>
+              </div>
+              <button
+                className="btn btn-success w-100"
+                onClick={handleCheckout}
+              >
+                Proceed to Checkout →
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

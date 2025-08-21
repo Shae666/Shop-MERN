@@ -13,7 +13,8 @@ export default function Wishlist({ updateWishlistCount }) {
   // Load wishlist from localStorage
   useEffect(() => {
     if (!userEmail) return;
-    const storedWishlist = JSON.parse(localStorage.getItem(`wishlist_${userEmail}`)) || [];
+    const storedWishlist =
+      JSON.parse(localStorage.getItem(`wishlist_${userEmail}`)) || [];
     setWishlist(storedWishlist);
   }, [userEmail]);
 
@@ -38,17 +39,38 @@ export default function Wishlist({ updateWishlistCount }) {
       </div>
 
       <h1 className="mb-4">Your Wishlist ❤️</h1>
+
       {wishlist.length === 0 ? (
-        <p>No items in your wishlist yet.</p>
+        <div className="text-center my-5">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/4207/4207243.png"
+            alt="Empty Wishlist"
+            style={{ width: "120px", opacity: 0.7 }}
+          />
+          <h3 className="mt-3">Your wishlist is empty 💔</h3>
+          <p className="text-muted">
+            Start adding items you love and save them here.
+          </p>
+          <button
+            className="btn btn-primary mt-3"
+            onClick={() => navigate("/Home")}
+          >
+            Browse Products →
+          </button>
+        </div>
       ) : (
         <div className="row">
           {wishlist.map((item) => (
             <div key={item.productId} className="col-md-3 mb-4">
               <div className="card h-100 shadow-sm product-card position-relative">
-                <img src={item.img} className="card-img-top" alt={item.title} />
+                <img
+                  src={item.img}
+                  className="card-img-top"
+                  alt={item.title}
+                />
                 <div className="card-body text-center">
                   <h5 className="card-title">{item.title}</h5>
-                  <p>${item.price.toFixed(2)}</p> {/* Added $ */}
+                  <p>${item.price.toFixed(2)}</p>
                   <button
                     className="btn btn-danger"
                     onClick={() => handleRemove(item.productId)}
